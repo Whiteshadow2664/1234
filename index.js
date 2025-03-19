@@ -25,20 +25,19 @@ client.on('messageCreate', async (message) => {
     }
 
     const text = args.join(" ");
-    const targetLang = "en"; // Default translation to English
+    const sourceLang = "auto"; // Auto-detect
+    const targetLang = "en"; // Default to English
 
     try {
-        const response = await axios.post("https://translate.argosopentech.com/translate", {
-            q: text,
-            source: "auto",
-            target: targetLang,
-            format: "text"
-        }, {
-            headers: { "Content-Type": "application/json" }
+        const response = await axios.get(`https://api.mymemory.translated.net/get`, {
+            params: {
+                q: text,
+                langpair: `${sourceLang}|${targetLang}`
+            }
         });
 
-        if (response.data && response.data.translatedText) {
-            message.reply(`**📝 Translated:** ${response.data.translatedText}`);
+        if (response.data.responseData && response.data.responseData.translatedText) {
+            message.reply(`**📝 Translated:** ${response.data.responseData.translatedText}`);
         } else {
             message.reply("⚠️ Translation failed. Try again later.");
         }
