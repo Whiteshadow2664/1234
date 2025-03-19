@@ -25,14 +25,21 @@ client.on('messageCreate', async (message) => {
     }
 
     const text = args.join(" ");
-    const sourceLang = "auto"; // Auto-detect
     const targetLang = "en"; // Default to English
 
     try {
+        // 🔹 Step 1: Detect Language using Google Translate (free method)
+        const detectRes = await axios.get(`https://api.mymemory.translated.net/get`, {
+            params: { q: text, langpair: "en|fr" } // Dummy translation to get detected language
+        });
+
+        const detectedLang = detectRes.data.responseData.detectedLanguage || "en";
+
+        // 🔹 Step 2: Translate using detected language
         const response = await axios.get(`https://api.mymemory.translated.net/get`, {
             params: {
                 q: text,
-                langpair: `${sourceLang}|${targetLang}`
+                langpair: `${detectedLang}|${targetLang}`
             }
         });
 
