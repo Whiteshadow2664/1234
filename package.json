@@ -1,7 +1,7 @@
 {
   "name": "discord-translate-bot",
   "version": "1.0.0",
-  "description": "A Discord bot that translates text using DeepL API.",
+  "description": "A Discord bot that translates text using LibreTranslate API.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
