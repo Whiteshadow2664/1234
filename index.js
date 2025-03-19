@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const axios = require('axios');
@@ -44,9 +43,12 @@ client.on('messageCreate', async (message) => {
 
         let detectedLang = detectRes.data.responseData.detectedLanguage || "en";
 
-        // 🔹 Step 2: Prevent same language errors
+        // 🔹 Step 2: Ensure valid translation direction
         if (detectedLang === targetLang) {
-            return message.reply("⚠️ The text is already in the target language.");
+            return message.reply(`⚠️ The text is already in **${targetLang.toUpperCase()}**.`);
+        }
+        if (!SUPPORTED_LANGS.includes(detectedLang)) {
+            return message.reply("⚠️ The detected language is not supported.");
         }
 
         // 🔹 Step 3: Translate
@@ -57,10 +59,12 @@ client.on('messageCreate', async (message) => {
             }
         });
 
-        if (response.data.responseData && response.data.responseData.translatedText) {
-            message.reply(`**📝 Translated (${detectedLang} → ${targetLang}):** ${response.data.responseData.translatedText}`);
+        const translatedText = response.data.responseData.translatedText;
+
+        if (translatedText && translatedText.toLowerCase() !== text.toLowerCase()) {
+            message.reply(`**📝 Translated (${detectedLang} → ${targetLang}):** ${translatedText}`);
         } else {
-            message.reply("⚠️ Translation failed. Try again later.");
+            message.reply("⚠️ No meaningful translation found.");
         }
     } catch (error) {
         console.error("❌ Translation error:", error);
