@@ -36,19 +36,17 @@ client.on('messageCreate', async (message) => {
     }
 
     try {
-        // 🔹 Step 1: Detect input language
-        const detectRes = await axios.get(`https://api.mymemory.translated.net/get`, {
-            params: { q: text, langpair: "en|it" } // Trick MyMemory to detect language
-        });
+        // 🔹 Step 1: Detect input language using a better API
+        const detectRes = await axios.post("https://ws.detectlanguage.com/0.2/detect", 
+            { q: text }, 
+            { headers: { Authorization: `Bearer ${process.env.DETECTLANG_API_KEY}` } }
+        );
 
-        let detectedLang = detectRes.data.responseData.detectedLanguage || "en";
+        let detectedLang = detectRes.data.data.detections[0].language;
 
         // 🔹 Step 2: Ensure valid translation direction
         if (detectedLang === targetLang) {
             return message.reply(`⚠️ The text is already in **${targetLang.toUpperCase()}**.`);
-        }
-        if (!SUPPORTED_LANGS.includes(detectedLang)) {
-            return message.reply("⚠️ The detected language is not supported.");
         }
 
         // 🔹 Step 3: Translate
@@ -61,11 +59,11 @@ client.on('messageCreate', async (message) => {
 
         const translatedText = response.data.responseData.translatedText;
 
-        if (translatedText && translatedText.toLowerCase() !== text.toLowerCase()) {
-            message.reply(`**📝 Translated (${detectedLang} → ${targetLang}):** ${translatedText}`);
-        } else {
-            message.reply("⚠️ No meaningful translation found.");
+        if (translatedText.toLowerCase() === text.toLowerCase()) {
+            return message.reply("⚠️ No meaningful translation found.");
         }
+
+        message.reply(`**📝 Translated (${detectedLang} → ${targetLang}):** ${translatedText}`);
     } catch (error) {
         console.error("❌ Translation error:", error);
         message.reply("⚠️ Error translating text. API might be down or rate-limited.");
