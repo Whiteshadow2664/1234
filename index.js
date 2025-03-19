@@ -25,20 +25,26 @@ client.on('messageCreate', async (message) => {
     }
 
     const text = args.join(" ");
-    const targetLang = "en"; // Change this if needed
+    const targetLang = "en"; // Default translation to English
 
     try {
-        const response = await axios.post("https://libretranslate.com/translate", {
+        const response = await axios.post("https://translate.argosopentech.com/translate", {
             q: text,
             source: "auto",
             target: targetLang,
             format: "text"
+        }, {
+            headers: { "Content-Type": "application/json" }
         });
 
-        message.reply(`**📝 Translated:** ${response.data.translatedText}`);
+        if (response.data && response.data.translatedText) {
+            message.reply(`**📝 Translated:** ${response.data.translatedText}`);
+        } else {
+            message.reply("⚠️ Translation failed. Try again later.");
+        }
     } catch (error) {
         console.error("❌ Translation error:", error);
-        message.reply("⚠️ Error translating text. Please try again.");
+        message.reply("⚠️ Error translating text. API might be down or rate-limited.");
     }
 });
 
